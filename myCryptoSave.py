@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import json
 import sys 
-# Carregar a chave pública
+
 with open("chavePublica.txt", "rb") as file:
     public_key_pem = file.read()
 
@@ -13,13 +13,13 @@ public_key = serialization.load_pem_public_key(
     backend=default_backend()
 )
 
-# Criar o objeto de criptografia usando a chave pública
-#cipher = public_key.encryptor()
 
-# Criptografar a frase "Hello world"
 plaintext = b"testeeeeeeeee"
 if len(sys.argv)>1:
-    plaintext = sys.argv[1].encode()
+    #plaintext = sys.argv[1].encode()
+    file_name = sys.argv[1]
+    with open(file_name, "rb") as file:
+        plaintext = file.read()
 #print(plaintext)
 #ciphertext = cipher.update(plaintext) + cipher.finalize()
 ciphertext = public_key.encrypt(
@@ -31,12 +31,11 @@ ciphertext = public_key.encrypt(
     )
 )
 data = {
-    "message": ciphertext.hex()  # Converter o texto criptografado para hexadecimal
+    "message": ciphertext.hex()  
 }
 
 with open("textoCriptografado.json", "w") as file:
     json.dump(data, file)
     
-# Salvar o texto criptografado em um arquivo
 with open("textoCriptografado.txt", "wb") as file:
     file.write(ciphertext)
