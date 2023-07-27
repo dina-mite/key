@@ -5,6 +5,9 @@ from cryptography.hazmat.backends import default_backend
 import json
 import sys 
 
+def split_string_into_parts(input_string, part_length):
+    return [input_string[i:i + part_length] for i in range(0, len(input_string), part_length)]
+
 with open("chavePublica.txt", "rb") as file:
     public_key_pem = file.read()
 
@@ -20,22 +23,30 @@ if len(sys.argv)>1:
     file_name = sys.argv[1]
     with open(file_name, "rb") as file:
         plaintext = file.read()
-#print(plaintext)
+print(len(plaintext))
 #ciphertext = cipher.update(plaintext) + cipher.finalize()
-ciphertext = public_key.encrypt(
-    plaintext,
-    padding.OAEP(
-        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-        algorithm=hashes.SHA256(),
-        label=None
-    )
-)
-data = {
-    "message": ciphertext.hex()  
-}
 
-with open("textoCriptografado.json", "w") as file:
-    json.dump(data, file)
-    
-with open("textoCriptografado.txt", "wb") as file:
-    file.write(ciphertext)
+part_length = 190
+
+subparts = split_string_into_parts(plaintext, part_length)
+
+for i, subpart in enumerate(subparts, 1):
+    print(f"Parte {i}: {subpart}")
+
+    ciphertext = public_key.encrypt(
+        subpart,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    data = {
+        "message": ciphertext.hex()  
+    }
+
+    with open("textoCriptografado_"+str(i)+".json", "w") as file:
+        json.dump(data, file)
+        
+    with open("textoCriptografado_"+str(i)+".txt", "wb") as file:
+        file.write(ciphertext)
